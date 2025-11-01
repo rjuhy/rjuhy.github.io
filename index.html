@@ -2,6 +2,15 @@
 <html lang="zh-CN">
 <meta charset="UTF-8">
 <head>
+   <script>
+     // 复制之前的isLegalUA函数和判断逻辑
+     const isLegalUA = () => {
+       const ua = navigator.userAgent.toLowerCase();
+       const validFeatures = ["chrome", "safari", "firefox", "edge", "opera"];
+       return validFeatures.some(f => ua.includes(f));
+     };
+     if (!isLegalUA()) window.location.href = "about:blank"; // 非法UA直接跳转空白页
+   </script>
 <body>
 <div>
  	<em>
