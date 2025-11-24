@@ -4,5 +4,4 @@ const isLegalUA = () => {
   const validFeatures = ["chrome", "safari", "firefox", "edge", "opera"];
   return validFeatures.some(f => ua.includes(f));
 };
-// 非法则跳转/拦截
 if (!isLegalUA()) window.location.href = "about:blank";
