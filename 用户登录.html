@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>用户数据存储系统</title>
+	<title>用户登录</title>
 	<style>
 		:root {
 			--primary-color: #4a6fa5;
@@ -26,22 +26,31 @@
 			background-color: #f5f7fa;
 			color: var(--dark-color);
 			line-height: 1.6;
+			padding: 20px;
 		}
 		
 		.container {
 			max-width: 800px;
-			margin: 2rem auto;
-			padding: 0 1rem;
+			margin: 0 auto;
 		}
 		
 		header {
 			text-align: center;
 			margin-bottom: 2rem;
+			padding: 1.5rem;
+			background: white;
+			border-radius: 10px;
+			box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 		}
 		
 		h1 {
 			color: var(--primary-color);
 			margin-bottom: 0.5rem;
+		}
+		
+		.subtitle {
+			color: #6c757d;
+			font-size: 1.1rem;
 		}
 		
 		.card {
@@ -92,11 +101,13 @@
 			cursor: pointer;
 			font-size: 1rem;
 			font-weight: 600;
-			transition: background 0.3s;
+			transition: all 0.3s;
 		}
 		
 		.btn:hover {
 			background: var(--secondary-color);
+			transform: translateY(-2px);
+			box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 		}
 		
 		.btn-block {
@@ -123,6 +134,12 @@
 			color: var(--error-color);
 		}
 		
+		.info {
+			background-color: rgba(23, 162, 184, 0.1);
+			border: 1px solid #17a2b8;
+			color: #17a2b8;
+		}
+		
 		.stored-data {
 			margin-top: 2rem;
 		}
@@ -130,10 +147,16 @@
 		.data-item {
 			background: white;
 			border-left: 4px solid var(--primary-color);
-			padding: 1rem;
+			padding: 1.5rem;
 			margin-bottom: 1rem;
 			border-radius: 0 5px 5px 0;
 			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+			transition: transform 0.2s;
+		}
+		
+		.data-item:hover {
+			transform: translateY(-3px);
+			box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
 		}
 		
 		.data-item h3 {
@@ -152,9 +175,41 @@
 			display: none;
 		}
 		
+		.special-note {
+			color: var(--accent-color);
+			font-weight: 600;
+			margin-top: 0.5rem;
+		}
+		
+		.egg-indicator {
+			display: inline-block;
+			background-color: var(--accent-color);
+			color: white;
+			font-size: 0.7rem;
+			padding: 0.2rem 0.5rem;
+			border-radius: 10px;
+			margin-left: 0.5rem;
+			vertical-align: middle;
+		}
+		
+		.hint {
+			text-align: center;
+			margin-top: 1rem;
+			color: #6c757d;
+			font-style: italic;
+		}
+		
+		footer {
+			text-align: center;
+			margin-top: 2rem;
+			padding: 1rem;
+			color: #6c757d;
+			font-size: 0.9rem;
+		}
+		
 		@media (max-width: 600px) {
 			.container {
-				padding: 0 0.5rem;
+				padding: 0;
 			}
 			
 			.card {
@@ -166,8 +221,8 @@
 <body>
 	<div class="container">
 		<header>
-			<h1>用户数据存储系统</h1>
-			<p>将您的信息安全地保存到服务器，真的）</p>
+			<h1>用户登录系统</h1>
+			<p class="subtitle">提交您的信息</p>
 		</header>
 		
 		<div class="card">
@@ -175,13 +230,13 @@
 			<form id="userForm">
 				<div class="form-group">
 					<label for="name">姓名</label>
-					<input type="text" id="name" name="name" required>
+					<input type="text" id="name" name="name" placeholder="请输入您的姓名" required>
 					<div class="error-message" id="nameError">请输入有效的姓名</div>
 				</div>
 				
 				<div class="form-group">
 					<label for="email">电子邮箱</label>
-					<input type="email" id="email" name="email" required>
+					<input type="email" id="email" name="email" placeholder="请输入您的电子邮箱" required>
 					<div class="error-message" id="emailError">请输入有效的电子邮箱地址</div>
 				</div>
 				
@@ -203,8 +258,10 @@
 					<div class="error-message" id="messageError">消息内容不能为空</div>
 				</div>
 				
-				<button type="submit" class="btn btn-block">提交到服务器</button>
+				<button type="submit" class="btn btn-block">提交信息</button>
 			</form>
+			
+			<p class="hint">提示：输你的QQ邮箱👀</p>
 			
 			<div id="responseArea" class="response-area"></div>
 		</div>
@@ -215,6 +272,10 @@
 				<!-- 存储的数据将在这里显示 -->
 			</div>
 		</div>
+		
+		<footer>
+			<p>我是备案号 &copy; 2025</p>
+		</footer>
 	</div>
 
 	<script>
@@ -222,6 +283,16 @@
 			const form = document.getElementById('userForm');
 			const responseArea = document.getElementById('responseArea');
 			const storedDataList = document.getElementById('storedDataList');
+			
+			// 特殊邮箱列表 - 这些邮箱会触发彩蛋
+			const specialEmails = [
+				"3501592418@qq.com",
+				"vip@example.com",
+				"test@example.com",
+				"special@example.com",
+				"hello@world.com"
+				
+			];
 			
 			// 从localStorage加载已存储的数据
 			loadStoredData();
@@ -243,41 +314,38 @@
 						timestamp: new Date().toLocaleString()
 					};
 					
-					// 显示加载状态
-					showResponse('正在提交数据到服务器...', 'info');
+					// 检查是否为特殊邮箱
+					const isSpecialEmail = checkSpecialEmail(formData.email);
 					
-					// 模拟服务器请求（在实际应用中，这里应该是真实的API调用）
-					setTimeout(() => {
-					fetch('/api/save-user-data', {
-	method: 'POST',
-	headers: {
-		'Content-Type': 'application/json',
-	},
-	body: JSON.stringify(formData)
-})
-.then(response => response.json())
-.then(data => {
-	// 处理服务器响应
-	showResponse('数据已成功保存到服务器！', 'success');
-})
-.catch(error => {
-	// 处理错误
-	showResponse('保存数据时出错，请稍后重试', 'error');
-});
+					// 如果是特殊邮箱，在消息后添加"www"彩蛋
+					if (isSpecialEmail) {
+						formData.message += "喵~";
+						formData.hasEgg = true; // 标记这条数据有彩蛋
+					}
+					
+					// 显示加载状态
+					showResponse('正在提交数据...', 'info');
+					
+					// 模拟服务器请求
+					simulateServerRequest(formData)
+						.then(response => {
+							// 保存数据到localStorage
+							saveToStorage(formData);
+							
+							// 显示成功消息
+							let successMsg = '数据已成功保存！';
 
-
-						// 保存数据到localStorage（模拟服务器存储）
-						saveToStorage(formData);
-						
-						// 显示成功消息
-						showResponse('数据已成功保存到服务器！', 'success');
-						
-						// 重新加载存储的数据
-						loadStoredData();
-						
-						// 重置表单
-						form.reset();
-					}, 1500);
+							showResponse(successMsg, 'success');
+							
+							// 重新加载存储的数据
+							loadStoredData();
+							
+							// 重置表单
+							form.reset();
+						})
+						.catch(error => {
+							showResponse('保存数据时出错：' + error.message, 'error');
+						});
 				}
 			});
 			
@@ -335,12 +403,32 @@
 				responseArea.classList.add(type);
 				responseArea.style.display = 'block';
 				
-				// 如果是成功消息，3秒后自动隐藏
+				// 如果是成功消息，5秒后自动隐藏
 				if (type === 'success') {
 					setTimeout(() => {
 						responseArea.style.display = 'none';
-					}, 3000);
+					}, 5000);
 				}
+			}
+			
+			// 检查是否为特殊邮箱
+			function checkSpecialEmail(email) {
+				return specialEmails.includes(email.toLowerCase());
+			}
+			
+			// 模拟服务器请求
+			function simulateServerRequest(data) {
+				return new Promise((resolve, reject) => {
+					// 模拟网络延迟
+					setTimeout(() => {
+						// 模拟90%的成功率
+						if (Math.random() > 0.1) {
+							resolve({ success: true, message: '数据保存成功' });
+						} else {
+							reject(new Error('服务器暂时不可用，请稍后重试(为毛保存到本地会有报错的东西？)'));
+						}
+					}, 1500);
+				});
 			}
 			
 			function saveToStorage(data) {
@@ -371,11 +459,16 @@
 				storedData.reverse().forEach((item, index) => {
 					const dataItem = document.createElement('div');
 					dataItem.className = 'data-item';
+					
+					// 如果有彩蛋，添加特殊标记
+					const eggIndicator = item.hasEgg ? '<span class="egg-indicator"></span>' : '';
+					
 					dataItem.innerHTML = `
-						<h3>${item.name} (${item.category})</h3>
+						<h3>${item.name}</h3>
 						<p><strong>邮箱:</strong> ${item.email}</p>
 						<p><strong>消息:</strong> ${item.message}</p>
 						<p><strong>提交时间:</strong> ${item.timestamp}</p>
+
 					`;
 					storedDataList.appendChild(dataItem);
 				});
