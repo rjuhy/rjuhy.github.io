@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<title>WebRTC 网页通话 Demo</title>
+<style>video{width:45%;height:200px;background:#222;margin:5px;}</style>
+</head>
+<body>
+
+  <h3>浏览器对浏览器通话（WebRTC）</h3>
+  <button id="start">开始通话</button>
+  <button id="hangup" disabled>挂断</button><br/>
+  <video id="local" autoplay muted></video>
+  <video id="remote" autoplay></video>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const startBtn  = document.getElementById('start');
+const hangBtn   = document.getElementById('hangup');
+const localVid  = document.getElementById('local');
+const remoteVid = document.getElementById('remote');
+const socket    = io();
+
+let pc = null, localStream = null;
+const room = 'demo';          // 简单写死一个房间号，所有人互拨
+socket.emit('join', room);
+
+startBtn.onclick = async ()=>{
+  localStream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
+  localVid.srcObject = localStream;
+  pc = new RTCPeerConnection({iceServers:[{urls:'stun:stun.l.google.com:19302'}]});
+  localStream.getTracks().forEach(trk=>pc.addTrack(trk, localStream));
+  pc.ontrack = e => remoteVid.srcObject = e.streams[0];
+  pc.onicecandidate = e => e.candidate && socket.emit('ice', room, e.candidate);
+  const offer = await pc.createOffer();
+  await pc.setLocalDescription(offer);
+  socket.emit('offer', room, offer);
+  startBtn.disabled = true;
+  hangBtn.disabled  = false;
+};
+
+socket.on('offer', async (from, desc)=>{
+  if(!pc) startBtn.onclick();          // 被动端先初始化
+  await pc.setRemoteDescription(desc);
+  const answer = await pc.createAnswer();
+  await pc.setLocalDescription(answer);
+  socket.emit('answer', from, answer);
+});
+socket.on('answer', (from, desc)=> pc.setRemoteDescription(desc));
+socket.on('ice',    (from, cand)=> pc.addIceCandidate(cand));
+hangBtn.onclick = ()=>{
+  pc && pc.close();
+  localStream && localStream.getTracks().forEach(t=>t.stop());
+  pc = localStream = null;
+  startBtn.disabled = false;
+  hangBtn.disabled  = true;
+  remoteVid.srcObject = null;
+};
+</script>
+</body>
+</html>
