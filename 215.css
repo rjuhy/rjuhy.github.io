@@ -1,0 +1,13 @@
+*{
+	margin: 0;
+	padding: 0;
+}
+body{
+	overflow: hidden;
+}
+<!-- vw和vh分别表示视口宽度和高度的百分比 -->
+canvas{
+	background-color: #000;
+	width: 100vw;
+	height: 100vh;
+}
